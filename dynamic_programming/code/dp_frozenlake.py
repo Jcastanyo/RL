@@ -59,7 +59,9 @@ class FrozenLake:
         episode_reward = 0
         ob = env.reset()
 
-        for t in range(max_steps):
+        iter = 0
+
+        for _ in range(max_steps):
 
             env.render()
             time.sleep(0.25)
@@ -74,6 +76,8 @@ class FrozenLake:
             # accumulate reward
             episode_reward += rew
 
+            iter += 1
+
             # ends when the agent achieves the terminal state.
             if done:
                 break
@@ -83,6 +87,7 @@ class FrozenLake:
         if not done:
             print("The agent didn't reach a terminal state in {} steps.".format(max_steps))
         else:
+            print(f"Number of iteration to finish: {iter}")
             print("Episode reward: %f" % episode_reward)
 
 
@@ -217,7 +222,7 @@ class FrozenLake:
             self.policy_stable = self.policy_improvement(gamma=0.9)
             iter += 1
         
-        print(f"Number of iterations: {iter}")
+        print(f"Number of iterations to converge: {iter}")
 
 
     def value_iteration(self, threshold, gamma):
@@ -264,7 +269,7 @@ class FrozenLake:
             if v_min <= threshold:
                 break
         
-        print(f"Number of iterations: {iter}")
+        print(f"Number of iterations to converge: {iter}")
 
 
 def main():
