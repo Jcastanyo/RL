@@ -2,6 +2,8 @@
 
     CODE FOR TESTING RL ALGORITHMS WHILE STUDYING SUTTON AND BARTO BOOK AND DEEP REINFORCEMENT LEARNING HANDS-ON BOOK
 
+    Works with gym 0.26.2 version
+
 '''
 
 
@@ -14,13 +16,12 @@ import time
     Important in case you did not know:
 
         env.P returns the transition matrix with the probabilities, next_actions, rewards and done_info from each state.
-        env.nS returns the total number of states.
-        env.nA returns the total number of actions.
+
 '''
 
 # class to wrapp the frozen_lake env from gym and implement policy_evaluation, policy_iteration and value_iteration.
 class FrozenLake:
-    def __init__(self, size=4):
+    def __init__(self, size=8):
         """
             Definition of frozen_lake v0 env from gym (size and slippery mode), V function and policy pi.
 
@@ -34,13 +35,15 @@ class FrozenLake:
         self.max_iter = 100
 
         # definition and reset of the env.
-        self.env = gym.make('FrozenLake-v0', map_name=f"{size}x{size}", is_slippery=False)
+        self.env = gym.make('FrozenLake-v1', map_name=f"{size}x{size}", is_slippery=False, render_mode='human')
         # mandatory to reset the env at the beggining.
         self.env.reset()
         
         # definition of V function and policy pi.
-        self.state_value = np.zeros(self.env.nS)
-        self.policy = np.zeros(self.env.nS, dtype=int)
+        self.env_nS = size * size  # num of states
+        self.env_nA = 4  # num of actios
+        self.state_value = np.zeros(self.env_nS)
+        self.policy = np.zeros(self.env_nS, dtype=int)
         
     
     def render(self, max_steps=100):
@@ -61,9 +64,13 @@ class FrozenLake:
             self.env.render()
             time.sleep(0.25)
             # get the action from the policy
+            # to solve a bug because sometimes ob is a tuple containing the state
+            # and the prob. of transition and sometimes is only the state
+            if isinstance(ob, tuple):
+                ob = ob[0]
             a = self.policy[ob]
             # apply the action and get next_state, reward, done_info (true/false)
-            ob, rew, done, _ = self.env.step(a)
+            ob, rew, done, _, _ = self.env.step(a)
             # accumulate reward
             episode_reward += rew
 
@@ -132,7 +139,7 @@ class FrozenLake:
             v_max = 0
             
             # run over each state
-            for state in range(self.env.nS):
+            for state in range(self.env_nS):
 
                 # save the old value V[s]
                 v_old = self.state_value[state]
@@ -160,14 +167,14 @@ class FrozenLake:
         # bool variable to end the algorithm
         bool = True
 
-        for state in range(self.env.nS):
+        for state in range(self.env_nS):
 
                 # apply policy to save old_action pi(s)              
                 old_action = self.policy[state] 
 
                 # run over actions
                 action_values = []
-                for a in range(self.env.nA):
+                for a in range(self.env_nA):
 
                     # taking into account stochastic envs.
                     t_values = 0
@@ -230,12 +237,12 @@ class FrozenLake:
 
             v_min = 0
             
-            for state in range(self.env.nS):
+            for state in range(self.env_nS):
 
                 action_values = []
                 v_old = self.state_value[state]
                 
-                for a in range(self.env.nA):
+                for a in range(self.env_nA):
                     t_values = 0
 
                     transitions = self.env.P[state][a]
