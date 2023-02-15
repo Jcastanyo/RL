@@ -40,8 +40,8 @@ class FrozenLake:
         self.env.reset()
         
         # definition of V function and policy pi.
-        self.env_nS = size * size  # num of states
-        self.env_nA = 4  # num of actios
+        self.env_nS = self.env.observation_space.n  # num of states
+        self.env_nA = self.env.action_space.n # num of actions
         self.state_value = np.zeros(self.env_nS)
         self.policy = np.zeros(self.env_nS, dtype=int)
         
