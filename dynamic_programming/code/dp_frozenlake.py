@@ -41,12 +41,12 @@ class FrozenLake:
         
         # definition of V function and policy pi.
         self.env_nS = self.env.observation_space.n  # num of states
-        self.env_nA = self.env.action_space.n # num of actions
+        self.env_nA = self.env.action_space.n  # num of actions
         self.state_value = np.zeros(self.env_nS)
         self.policy = np.zeros(self.env_nS, dtype=int)
         
     
-    def render(self, max_steps=100):
+    def render(self, env, max_steps=100):
 
         '''
             Function used to visualize the agent solving the environment.
@@ -57,11 +57,11 @@ class FrozenLake:
         '''
 
         episode_reward = 0
-        ob = self.env.reset()
+        ob = env.reset()
 
         for t in range(max_steps):
 
-            self.env.render()
+            env.render()
             time.sleep(0.25)
             # get the action from the policy
             # to solve a bug because sometimes ob is a tuple containing the state
@@ -70,7 +70,7 @@ class FrozenLake:
                 ob = ob[0]
             a = self.policy[ob]
             # apply the action and get next_state, reward, done_info (true/false)
-            ob, rew, done, _, _ = self.env.step(a)
+            ob, rew, done, _, _ = env.step(a)
             # accumulate reward
             episode_reward += rew
 
@@ -78,7 +78,7 @@ class FrozenLake:
             if done:
                 break
 
-        self.env.render()
+        env.render()
         
         if not done:
             print("The agent didn't reach a terminal state in {} steps.".format(max_steps))
@@ -233,7 +233,7 @@ class FrozenLake:
 
         iter = 0
 
-        for iter in range(self.max_iter):
+        for _ in range(self.max_iter):
 
             v_min = 0
             
@@ -259,6 +259,7 @@ class FrozenLake:
                 v_error = abs(self.state_value[state] - v_old)
                 v_min = max(v_min, v_error)
 
+            iter += 1
 
             if v_min <= threshold:
                 break
@@ -270,12 +271,15 @@ def main():
     
     frozen_lake_env = FrozenLake()
 
+    # good practice to test the agent in a different environment (testing env)
+    frozen_lake_env_test = gym.make('FrozenLake-v1', map_name="8x8", is_slippery=False, render_mode='human')
+
     print(f"-----------------POLICY ITERATION RUNNING-----------------")
     frozen_lake_env.policy_iteration()
-    frozen_lake_env.render(100)
+    frozen_lake_env.render(frozen_lake_env_test, 100)
     print(f"-----------------VALUE ITERATION RUNNING-----------------")
     frozen_lake_env.value_iteration(1e-3, 0.9)
-    frozen_lake_env.render(100)
+    frozen_lake_env.render(frozen_lake_env_test, 100)
 
 
 if __name__ == '__main__':
